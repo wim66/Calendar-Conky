@@ -1,7 +1,7 @@
 -- calendar.lua
--- Tekent een maandoverzicht kalender met kleurinstellingen voor alle elementen
--- Versie: 1.0 - 1 mei 2025
--- Auteur: Wim66
+-- Draws a monthly calendar with color settings for all elements
+-- Version: 1.0 - May 1, 2025
+-- Author: Wim66
 
 require 'cairo'
 -- Attempt to safely require the 'cairo_xlib' module
@@ -18,7 +18,7 @@ if not status then
     })
 end
 
--- Hulpfunctie: hex naar rgba
+-- Helper function: hex to rgba
 local function hex_to_rgba(hex)
     hex = hex:gsub("#","")
     local r = tonumber("0x"..hex:sub(1,2)) / 255
@@ -27,7 +27,7 @@ local function hex_to_rgba(hex)
     return r, g, b, 1
 end
 
--- Main functie
+-- Main function
 function conky_draw_calendar()
     if not conky_window then return end
 
@@ -36,7 +36,7 @@ function conky_draw_calendar()
     local surface = cairo_xlib_surface_create(conky_window.display, conky_window.drawable, conky_window.visual, w, h)
     local cr = cairo_create(surface)
 
-    -- Instellingen (pas aan naar smaak)
+    -- Settings (adjust to your preference)
     local font_name = "Ubuntu Mono"
     local font_size = 16
     local day_spacing = 22
@@ -44,7 +44,7 @@ function conky_draw_calendar()
     local start_y = 40
     local show_weeknums = true
 
-    -- Kleurinstellingen
+    -- Color settings
     local colour_month = "#44AAFF"
     local colour_weekdays = "#CCCCCC"
     local colour_days = "#FFFFFF"
@@ -59,7 +59,7 @@ function conky_draw_calendar()
     cairo_surface_destroy(surface)
 end
 
--- Kalender tekenen
+-- Draw the calendar
 function draw_calendar(cr, x, y, font, size, spacing, weeknums,
     colour_month, colour_weekdays, colour_days, colour_today, colour_outside, colour_weeknums)
     -- Draw month name
@@ -120,7 +120,7 @@ function draw_days(cr, x, y, font, size, spacing, weeknums,
     local now = os.date("*t")
     local year, month, day = now.year, now.month, now.day
     local first_day = os.time{year=year, month=month, day=1}
-    local start_weekday = tonumber(os.date("%w", first_day)) -- 0=Zondag
+    local start_weekday = tonumber(os.date("%w", first_day)) -- 0=Sunday
     if start_weekday == 0 then start_weekday = 7 end
 
     local days_in_month = os.date("*t", os.time{year=year, month=month+1, day=0}).day
@@ -175,7 +175,7 @@ function draw_week_numbers(cr, x, y, font, size, spacing, colour)
     local now = os.date("*t")
     local year, month = now.year, now.month
     local first_day = os.time{year=year, month=month, day=1}
-    local start_weekday = tonumber(os.date("%w", first_day)) -- 0=Zondag
+    local start_weekday = tonumber(os.date("%w", first_day)) -- 0=Sunday
     if start_weekday == 0 then start_weekday = 7 end
 
     cairo_set_source_rgba(cr, hex_to_rgba(colour))
