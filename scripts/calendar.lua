@@ -44,7 +44,7 @@ function conky_draw_calendar()
     local start_y = 40
     local show_weeknums = true
     local week_starts = "monday" -- monday or sunday
-    local language = "english" -- english, dutch (add more languages as needed)
+    local language = "english" -- english, dutch, german, spanish, french
 
     -- Color settings
     local colour_month = "#44AAFF"
@@ -78,7 +78,7 @@ function draw_calendar(cr, x, y, font, size, spacing, weeknums, week_starts, lan
 
     -- Draw week numbers
     if weeknums then
-        draw_week_numbers(cr, x, y, font, size, spacing, colour_weeknums, week_starts)
+        draw_week_numbers(cr, x, y, font, size, spacing, colour_weeknums, week_starts, language)
     end
 end
 
@@ -91,12 +91,19 @@ function draw_month_name(cr, x, y, font, size, colour, language)
         dutch = {
             months = {"Januari", "Februari", "Maart", "April", "Mei", "Juni",
                       "Juli", "Augustus", "September", "Oktober", "November", "December"}
+        },
+        german = {
+            months = {"Januar", "Februar", "März", "April", "Mai", "Juni",
+                      "Juli", "August", "September", "Oktober", "November", "Dezember"}
+        },
+        spanish = {
+            months = {"enero", "febrero", "marzo", "abril", "mayo", "junio",
+                      "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"}
+        },
+        french = {
+            months = {"janvier", "février", "mars", "avril", "mai", "juin",
+                      "juillet", "août", "septembre", "octobre", "novembre", "décembre"}
         }
-        -- Add more languages here, e.g.:
-        -- french = {
-        --     months = {"janvier", "février", "mars", "avril", "mai", "juin",
-        --               "juillet", "août", "septembre", "octobre", "novembre", "décembre"}
-        -- }
     }
 
     local month_names = translations[language] and translations[language].months or
@@ -122,12 +129,19 @@ function draw_weekdays(cr, x, y, font, size, spacing, colour, week_starts, langu
         dutch = {
             monday = {"ma", "di", "wo", "do", "vr", "za", "zo"},
             sunday = {"zo", "ma", "di", "wo", "do", "vr", "za"}
+        },
+        german = {
+            monday = {"Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"},
+            sunday = {"So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"}
+        },
+        spanish = {
+            monday = {"lu", "ma", "mi", "ju", "vi", "sá", "do"},
+            sunday = {"do", "lu", "ma", "mi", "ju", "vi", "sá"}
+        },
+        french = {
+            monday = {"lu", "ma", "me", "je", "ve", "sa", "di"},
+            sunday = {"di", "lu", "ma", "me", "je", "ve", "sa"}
         }
-        -- Add more languages here, e.g.:
-        -- french = {
-        --     monday = {"lu", "ma", "me", "je", "ve", "sa", "di"},
-        --     sunday = {"di", "lu", "ma", "me", "je", "ve", "sa"}
-        -- }
     }
 
     local weekday_names = translations[language] and translations[language][week_starts] or
@@ -204,29 +218,62 @@ function draw_days(cr, x, y, font, size, spacing, weeknums, week_starts,
     end
 end
 
-function draw_week_numbers(cr, x, y, font, size, spacing, colour, week_starts)
+function draw_week_numbers(cr, x, y, font, size, spacing, colour, week_starts, language)
     local now = os.date("*t")
     local year, month = now.year, now.month
     local first_day = os.time{year=year, month=month, day=1}
     local start_weekday = tonumber(os.date("%w", first_day)) -- 0=Sunday
+
     if week_starts == "monday" then
         if start_weekday == 0 then start_weekday = 7 end
         start_weekday = start_weekday - 1
     end
 
+    -- Week label translations
+    local week_label_translations = {
+        english = "wk",
+        dutch = "wk",
+        german = "Wo",
+        spanish = "sm",
+        french = "sm"
+    }
+    local week_label = week_label_translations[language] or "wk"
+
+    -- Function to calculate week number for Sunday-based weeks
+    local function get_sunday_week_number(year, month, day)
+        local date = os.time{year=year, month=month, day=day}
+        local year_start = os.time{year=year, month=1, day=1}
+        local year_start_weekday = tonumber(os.date("%w", year_start)) -- 0=Sunday
+        local days_since_year_start = math.floor((date - year_start) / (24 * 3600))
+        local week_offset = (year_start_weekday == 0 and 0 or 7 - year_start_weekday)
+        local week_number = math.floor((days_since_year_start + week_offset) / 7) + 1
+        return week_number
+    end
+
     cairo_set_source_rgba(cr, hex_to_rgba(colour))
     local week_x = x - spacing
 
-    -- Draw "wk" label
+    -- Draw week label
     cairo_set_font_size(cr, size)
     cairo_move_to(cr, week_x, y - spacing)
-    cairo_show_text(cr, "wk")
+    cairo_show_text(cr, week_label)
 
+    -- Adjust start day to align with the first week of the month
+    local first_week_day = 1 - start_weekday -- Start at the first Sunday before or on day 1
     for l = 0, 4 do
-        local d = l * 7 + 1 - start_weekday
-        local time = os.time{year=year, month=month, day=d}
-        local wn = os.date("%V", time)
+        local d = first_week_day + l * 7
+        -- Use a valid day in the week for week number calculation (e.g., day 1 or later)
+        local calc_day = math.max(1, d)
+        local time = os.time{year=year, month=month, day=calc_day}
+        local wn
+        if week_starts == "monday" then
+            wn = os.date("%V", time) -- ISO 8601 (Monday-based)
+        else
+            wn = get_sunday_week_number(year, month, calc_day) -- Sunday-based
+        end
+        -- Debug output
+        -- print(string.format("Debug: Week row %d, start day %d, calc day %d, week number %s", l, d, calc_day, wn))
         cairo_move_to(cr, week_x, y + l*spacing)
-        cairo_show_text(cr, wn)
+        cairo_show_text(cr, tostring(wn))
     end
 end
