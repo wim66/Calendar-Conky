@@ -1,6 +1,6 @@
 -- settings.lua
 -- by @wim66
--- v4.1 29-April-2025
+-- v4.1 May 2, 2025
 
 -- Set the path to the scripts foder
 package.path = "./scripts/?.lua"
@@ -15,6 +15,6 @@ function conky_vars()
     -- bg_COLOR: Background color and opacity for the widget.
     -- Format: "color,opacity"
     -- Example: "0x1d1e28,0.75" sets a dark purple background with 75% opacity.
-    bg_COLOR = "0x1d1d2e,0.5"
+    bg_COLOR = "0x1d1d2e,1"
 end
 

@@ -1,6 +1,6 @@
 -- background.lua
 -- by @wim66
--- April 26 2025
+-- May 2, 2025
 
 -- === Required Cairo Modules ===
 require 'cairo'
@@ -63,28 +63,28 @@ local boxes_settings = {
     -- Background
     {
         type = "background",
-        x = 2, y = 2, w = 200, h = 200,
+        x = 0, y = 0, w = 206, h = 206,
         centre_x = false,
-        corners = {0, 0, 0, 0},
+        corners = {20, 20, 20, 20},
         rotation = 0,
         draw_me = true,
         colour = bg_color
     },
     {
         type = "layer2",
-        x = 2, y = 2, w = 200, h = 200,
+        x = 0, y = 0, w = 206, h = 206,
         centre_x = false,
-        corners = {0, 0, 0, 0},
+        corners = {20, 20, 20, 20},
         rotation = 0,
         draw_me = true,
-        linear_gradient = {0, 0, 202, 202},
-        colours = {{0, 0x55007f, 0.33},{0.5, 0xff69ff, 0.33},{1, 0x55007f, 0.33}},
+        linear_gradient = {0, 0, 206, 206},
+        colours = {{0, 0x55007f, 0.5},{0.5, 0xff69ff, 0.5},{1, 0x55007f, 0.5}},
     },
     {
         type = "border",
         x = 0, y = 0, w = 206, h = 206,
         centre_x = false,
-        corners = {0, 0, 0, 0},
+        corners = {20, 20, 20, 20},
         rotation = 0,
         draw_me = true,
         border = 4,

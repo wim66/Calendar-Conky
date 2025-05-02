@@ -1,6 +1,6 @@
 -- loadall.lua
 -- by @wim66
--- v4.1 29-April-2025
+-- v4.1 May 2, 2025
 
 -- Set the path to the scripts folder
 package.path = "./scripts/?.lua"

@@ -61,6 +61,12 @@ The calendar appearance can be customized by editing the `calendar.lua` script. 
   local colour_outside = "#555555"  -- Days outside the current month
   local colour_weeknums = "#44AAFF" -- Week numbers
   ```
+- **Languages**:
+  ```lua
+  local week_starts = "monday" -- monday or sunday
+  local language = "english" -- english, dutch
+  You can add more languages in the translations section as needed
+  ```
 
 - **Spacing**:
   ```lua
