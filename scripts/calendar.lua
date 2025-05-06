@@ -1,6 +1,6 @@
 -- calendar.lua
 -- Draws a monthly calendar with color settings for all elements
--- Version: 1.1 - May 2, 2025
+-- Version: 1.2 - May 6, 2025
 -- Author: Wim66
 
 require 'cairo'
@@ -12,9 +12,7 @@ if not status then
     -- Redirects unknown keys to the global namespace (_G)
     -- Allows use of global Cairo functions like cairo_xlib_surface_create
     cairo_xlib = setmetatable({}, {
-        __index = function(_, key)
-            return _G[key]
-        end
+        __index = function(_, key) return _G[key] end
     })
 end
 
@@ -48,14 +46,15 @@ function conky_draw_calendar()
 
     -- Color settings
     local colour_month = "#44AAFF"
-    local colour_weekdays = "#CCCCCC"
+    local colour_weekdays = "#ffbf00"
+    local colour_weekday_today = "#00FF00"
     local colour_days = "#FFFFFF"
     local colour_today = "#00FF00"
     local colour_outside = "#808080"
     local colour_weeknums = "#44AAFF"
 
     draw_calendar(cr, start_x, start_y, font_name, font_size, day_spacing, show_weeknums, week_starts, language,
-        colour_month, colour_weekdays, colour_days, colour_today, colour_outside, colour_weeknums)
+        colour_month, colour_weekdays, colour_weekday_today, colour_days, colour_today, colour_outside, colour_weeknums)
 
     cairo_destroy(cr)
     cairo_surface_destroy(surface)
@@ -63,18 +62,18 @@ end
 
 -- Draw the calendar
 function draw_calendar(cr, x, y, font, size, spacing, weeknums, week_starts, language,
-    colour_month, colour_weekdays, colour_days, colour_today, colour_outside, colour_weeknums)
+    colour_month, colour_weekdays, colour_weekday_today, colour_days, colour_today, colour_outside, colour_weeknums)
+
     -- Draw month name
     draw_month_name(cr, x, y, font, size, colour_month, language)
 
     -- Draw weekdays
     y = y + spacing
-    draw_weekdays(cr, x, y, font, size, spacing, colour_weekdays, week_starts, language)
+    draw_weekdays(cr, x, y, font, size, spacing, colour_weekdays, colour_weekday_today, week_starts, language)
 
     -- Draw days
     y = y + spacing
-    draw_days(cr, x, y, font, size, spacing, weeknums, week_starts,
-        colour_days, colour_today, colour_outside)
+    draw_days(cr, x, y, font, size, spacing, weeknums, week_starts, colour_days, colour_today, colour_outside)
 
     -- Draw week numbers
     if weeknums then
@@ -82,32 +81,17 @@ function draw_calendar(cr, x, y, font, size, spacing, weeknums, week_starts, lan
     end
 end
 
+-- Draws the month name
 function draw_month_name(cr, x, y, font, size, colour, language)
     local translations = {
-        english = {
-            months = {"January", "February", "March", "April", "May", "June",
-                      "July", "August", "September", "October", "November", "December"}
-        },
-        dutch = {
-            months = {"Januari", "Februari", "Maart", "April", "Mei", "Juni",
-                      "Juli", "Augustus", "September", "Oktober", "November", "December"}
-        },
-        german = {
-            months = {"Januar", "Februar", "März", "April", "Mai", "Juni",
-                      "Juli", "August", "September", "Oktober", "November", "Dezember"}
-        },
-        spanish = {
-            months = {"enero", "febrero", "marzo", "abril", "mayo", "junio",
-                      "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"}
-        },
-        french = {
-            months = {"janvier", "février", "mars", "avril", "mai", "juin",
-                      "juillet", "août", "septembre", "octobre", "novembre", "décembre"}
-        }
+        english = { months = {"January","February","March","April","May","June","July","August","September","October","November","December"} },
+        dutch   = { months = {"Januari","Februari","Maart","April","Mei","Juni","Juli","Augustus","September","Oktober","November","December"} },
+        german  = { months = {"Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"} },
+        spanish = { months = {"enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"} },
+        french  = { months = {"janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"} }
     }
 
-    local month_names = translations[language] and translations[language].months or
-                        translations.english.months -- Fallback to English
+    local month_names = translations[language] and translations[language].months or translations.english.months
     local now = os.date("*t")
     local month_text = month_names[now.month] .. " " .. now.year
 
@@ -120,43 +104,63 @@ function draw_month_name(cr, x, y, font, size, colour, language)
     cairo_show_text(cr, month_text)
 end
 
-function draw_weekdays(cr, x, y, font, size, spacing, colour, week_starts, language)
+-- Draws the abbreviations of the weekdays
+function draw_weekdays(cr, x, y, font, size, spacing, colour, colour_today, week_starts, language)
     local translations = {
-        english = {
-            monday = {"Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"},
-            sunday = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"}
-        },
-        dutch = {
-            monday = {"ma", "di", "wo", "do", "vr", "za", "zo"},
-            sunday = {"zo", "ma", "di", "wo", "do", "vr", "za"}
-        },
-        german = {
-            monday = {"Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"},
-            sunday = {"So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"}
-        },
-        spanish = {
-            monday = {"lu", "ma", "mi", "ju", "vi", "sá", "do"},
-            sunday = {"do", "lu", "ma", "mi", "ju", "vi", "sá"}
-        },
-        french = {
-            monday = {"lu", "ma", "me", "je", "ve", "sa", "di"},
-            sunday = {"di", "lu", "ma", "me", "je", "ve", "sa"}
-        }
+        english = { monday = {"Mo","Tu","We","Th","Fr","Sa","Su"}, sunday = {"Su","Mo","Tu","We","Th","Fr","Sa"} },
+        dutch   = { monday = {"ma","di","wo","do","vr","za","zo"}, sunday = {"zo","ma","di","wo","do","vr","za"} },
+        german  = { monday = {"Mo","Di","Mi","Do","Fr","Sa","So"}, sunday = {"So","Mo","Di","Mi","Do","Fr","Sa"} },
+        spanish = { monday = {"lu","ma","mi","ju","vi","sá","do"}, sunday = {"do","lu","ma","mi","ju","vi","sá"} },
+        french  = { monday = {"lu","ma","me","je","ve","sa","di"}, sunday = {"di","lu","ma","me","je","ve","sa"} }
     }
 
-    local weekday_names = translations[language] and translations[language][week_starts] or
-                         translations.english[week_starts] -- Fallback to English
+    local names = translations[language] and translations[language][week_starts] or translations.english[week_starts]
+    local today_weekday = tonumber(os.date("%w")) -- 0 = Sunday
+
+    if week_starts == "monday" then
+        today_weekday = today_weekday == 0 and 6 or today_weekday - 1
+    end
 
     cairo_set_font_size(cr, size)
     cairo_select_font_face(cr, font, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL)
-    for i = 1, 7 do
-        local label = weekday_names[i]
-        cairo_set_source_rgba(cr, hex_to_rgba(colour))
-        cairo_move_to(cr, x + (i-1)*spacing, y)
+
+    for i = 0, 6 do
+        local label = names[i+1]
+        if i == today_weekday then
+            cairo_set_source_rgba(cr, hex_to_rgba(colour_today))
+        else
+            cairo_set_source_rgba(cr, hex_to_rgba(colour))
+        end
+        cairo_move_to(cr, x + i*spacing, y)
         cairo_show_text(cr, label)
     end
 end
 
+
+
+-- Draws the week numbers
+function draw_week_numbers(cr, x, y, font, size, spacing, colour, week_starts, language)
+    cairo_set_font_size(cr, size)
+    cairo_select_font_face(cr, font, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL)
+    cairo_set_source_rgba(cr, hex_to_rgba(colour))
+
+    local now = os.date("*t")
+    local first_day = os.time{year=now.year, month=now.month, day=1}
+    local start_day = tonumber(os.date("%w", first_day))
+    if week_starts == "monday" then
+        start_day = start_day == 0 and 6 or start_day - 1
+    end
+
+    local week_row = 0
+    local week_start = os.time{year=now.year, month=now.month, day=1 - start_day}
+    for i = 0, 5 do
+        local week_num = tonumber(os.date("%V", week_start + i*7*24*3600))
+        cairo_move_to(cr, x, y + i * spacing)
+        cairo_show_text(cr, tostring(week_num))
+    end
+end
+
+-- Draws the days of the month
 function draw_days(cr, x, y, font, size, spacing, weeknums, week_starts,
     colour_days, colour_today, colour_outside)
     -- Calculate days and positions

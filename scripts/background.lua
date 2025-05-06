@@ -1,6 +1,6 @@
 -- background.lua
 -- by @wim66
--- May 2, 2025
+-- May 6, 2025
 
 -- === Required Cairo Modules ===
 require 'cairo'
@@ -54,9 +54,23 @@ local function parse_bg_color(bg_color_str)
     return { {1, 0x000000, 0.5} }
 end
 
+-- Parse a layer_2 color string like "0,0xRRGGBB,alpha,..." into a gradient table
+local function parse_layer2_color(layer2_color_str)
+    local gradient = {}
+    for position, color, alpha in layer2_color_str:gmatch("([%d%.]+),0x(%x+),([%d%.]+)") do
+        table.insert(gradient, {tonumber(position), tonumber(color, 16), tonumber(alpha)})
+    end
+    -- Return a default gradient if parsing fails
+    if #gradient == 3 then
+        return gradient
+    end
+    return { {0, 0x55007f, 0.5}, {0.5, 0xff69ff, 0.5}, {1, 0x55007f, 0.5} }
+end
+
 -- Read color values from settings.lua variables
 local border_color = parse_border_color(border_COLOR or "0,0x003E00,1,0.5,0x03F404,1,1,0x003E00,1")
 local bg_color = parse_bg_color(bg_COLOR or "0x000000,0.5")
+local layer2_color = parse_layer2_color(layer_2 or "0,0x55007f,0.5,0.5,0xff69ff,0.5,1,0x55007f,0.5")
 
 -- === All drawable elements ===
 local boxes_settings = {
@@ -78,7 +92,7 @@ local boxes_settings = {
         rotation = 0,
         draw_me = true,
         linear_gradient = {0, 0, 206, 206},
-        colours = {{0, 0x55007f, 0.5},{0.5, 0xff69ff, 0.5},{1, 0x55007f, 0.5}},
+        colours = layer2_color, -- Dynamisch ingesteld vanuit settings.lua
     },
     {
         type = "border",
