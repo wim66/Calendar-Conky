@@ -78,7 +78,7 @@ local boxes_settings = {
     {
         type = "background",
         x = 0, y = 0, w = 206, h = 206,
-        centre_x = false,
+        centre_x = true,
         corners = {20, 20, 20, 20},
         rotation = 0,
         draw_me = true,
@@ -87,23 +87,23 @@ local boxes_settings = {
     {
         type = "layer2",
         x = 0, y = 0, w = 206, h = 206,
-        centre_x = false,
+        centre_x = true,
         corners = {20, 20, 20, 20},
         rotation = 0,
         draw_me = true,
-        linear_gradient = {0, 0, 206, 206},
+        linear_gradient = {103, 0, 103, 206},
         colours = layer2_color, -- Dynamisch ingesteld vanuit settings.lua
     },
     {
         type = "border",
         x = 0, y = 0, w = 206, h = 206,
-        centre_x = false,
+        centre_x = true,
         corners = {20, 20, 20, 20},
         rotation = 0,
         draw_me = true,
         border = 4,
         colour = border_color,
-        linear_gradient = {0, 0, 206, 206},
+        linear_gradient = {0, 0, 0, 206},
     },
 }
 

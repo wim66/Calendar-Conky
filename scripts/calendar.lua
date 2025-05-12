@@ -42,7 +42,7 @@ function conky_draw_calendar()
     local start_y = 40
     local show_weeknums = true
     local week_starts = "monday" -- monday or sunday
-    local language = "english" -- english, dutch, german, spanish, french
+    local language = "dutch" -- english, dutch, german, spanish, french
 
     -- Color settings
     local colour_month = "#44AAFF"
