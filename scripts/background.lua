@@ -91,7 +91,7 @@ local boxes_settings = {
         corners = {20, 20, 20, 20},
         rotation = 0,
         draw_me = true,
-        linear_gradient = {103, 0, 103, 206},
+        linear_gradient = {0, 0, 206, 206},
         colours = layer2_color, -- Dynamisch ingesteld vanuit settings.lua
     },
     {
@@ -103,7 +103,7 @@ local boxes_settings = {
         draw_me = true,
         border = 4,
         colour = border_color,
-        linear_gradient = {103, 0, 103, 206},
+        linear_gradient = {0, 0, 206, 206},
     },
 }
 
