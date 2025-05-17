@@ -2,7 +2,7 @@
 
 This repository contains a Conky configuration script to display a customizable calendar widget on your desktop.
 
-![Calendar-Conky](preview.png)
+![Calendar-Conky](preview.png)  ![Calendar-Conky](preview2.png)
 
 ## Features
 
